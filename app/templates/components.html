@@ -1,0 +1,59 @@
+{% macro render_field(field) %}
+<p>
+    {{ field.label }} <br>
+    <dd>{{ field(**kwargs)|safe }}</dd>
+    {{ field(size = 32) }} <br>
+    {% for error in field.errors %}
+        <span style = "color:red;">[{{ error }}]</span>
+    {% endfor %}
+</p>
+{% endmacro %}
+
+{% macro render_operation(operation) %}
+  <div class="card" style="width: 15rem;">
+    <div class="card-body">
+      <h5 class="card-title">
+          {{ operation.concepto }}
+      </h5>
+      <p class="card-text">
+        Total: ${{ operation.total }}    
+      </p>
+      <div class="container text-end">
+          <a href = "{{ url_for('ver', id = operation.id) }}" class="btn btn-light" style="background-color: #B3E7E8;">
+              <img src="{{ url_for('static', filename = 'eye.svg' )}}" alt="">
+              Ver
+          </a>    
+          <!--    
+          <button class="btn btn-light" style="background-color: #B3E7E8;">
+            <img src="{{ url_for('static', filename = 'pencil.svg' )}}" alt="">
+          </button>
+          <a href = "{{ url_for('ver', id = operation.id) }}" class="btn btn-light" style="background-color: #F56F6B;"">
+            <img src="{{ url_for('static', filename = 'trash.svg' )}}" alt="">
+          </a> -->
+      </div>  
+    </div>
+  </div>
+
+{% endmacro %}
+
+{% macro render_modal(operation) %}
+
+<div class="modal-dialog modal-dialog-centered" id="Modal{{ operation.id }}" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="staticBackdropLabel">Eliminar {{ operation.tipo }}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          ¿Está seguro de que desea eliminar la entrada con id: {{ operation.id }}?
+          Esta acción no se puede deshacer.
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <a type="button" class="btn btn-danger" href="{{ url_for('eliminar', id = operation.id) }}">Eliminar</a>
+        </div>
+      </div>
+    </div>
+</div>
+{% endmacro %}

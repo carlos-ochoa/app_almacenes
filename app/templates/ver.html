@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block app_content %}
+{% import 'components.html' as comp %}
+<button class="btn btn-light" style="background-color: #F56F6B;" data-bs-toggle="modal" data-bs-target="#Modal1">
+        <img src="{{ url_for('static', filename = 'trash.svg' )}}" alt="">
+</button>
+
+<div class="modal fade" id="Modal1" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="staticBackdropLabel">Eliminar {{ operacion.tipo }}</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              ¿Está seguro de que desea eliminar la entrada con id: {{ operacion.id }}?
+              Esta acción no se puede deshacer.
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+              <a type="button" class="btn btn-danger" href="{{ url_for('eliminar', id = operacion.id) }}">Eliminar</a>
+            </div>
+          </div>
+        </div>
+    </div>
+{% endblock %}

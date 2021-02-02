@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block app_content %}
+    {% import 'components.html' as comp %}
+    <br><br>
+    <h1>Caja del día</h1>
+    <br>
+    <div class="container">
+        <div class = "col">
+            <p>Saldo total: ${{ saldo_total }}</p>
+        </div>
+        <div class = "col">
+            <p>Cambio en monedas: ${{ cambio }}</p>
+        </div>
+    </div>
+    <br>
+    <h2>Entradas</h2>
+    <div class = "container">
+        <div class="row align-items-start">
+            {% for entrada in entradas %}
+                <div class="col-3">
+                    {{ comp.render_operation(entrada) }}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    <br>
+    <h2>Salidas</h2>
+{% endblock %}

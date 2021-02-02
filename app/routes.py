@@ -27,4 +27,15 @@ def resumen():
 
 @app.route('/caja')
 def caja():
-    return "caja"
+    entradas = Operacion.query.filter_by(tipo = 'entrada').all()
+    return render_template('caja.html', saldo_total = 0.0, cambio = 0.0, entradas = entradas)
+
+@app.route('/ver/<int:id>')
+def ver(id):
+    operacion = Operacion.query.filter_by(id = id).first()
+    return render_template('ver.html', operacion = operacion)
+
+
+@app.route('/eliminar/<int:id>')
+def eliminar(id):
+    return "eliminado"
