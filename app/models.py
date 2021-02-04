@@ -12,7 +12,7 @@ class Operacion(db.Model):
     tipo = db.Column(db.String(7), index = True)
 
     def __repr__(self):
-        return f'Operacion de tipo {self.tipo} con total {self.total} y secuencia {self.billetes}'
+        return f'Operacion de tipo {self.tipo} con total {self.total} y secuencia {self.billetes}, en fecha {self.fecha}'
 
 class Resumen(db.Model):
     id = db.Column(db.Integer, primary_key = True)

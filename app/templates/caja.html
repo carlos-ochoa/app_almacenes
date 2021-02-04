@@ -14,7 +14,20 @@
         </div>
     </div>
     <br>
-    <h2>Entradas</h2>
+
+    <div class="container">
+        <div class="row align-items-start">
+            <div class="col">
+                <h2>Entradas</h2>
+            </div>
+            <div class="col">
+                <a href = "{{ url_for('operacion', tipo = 'entrada') }}" class="btn btn-light" style="background-color: #CBFA8E;">
+                    <img src="{{ url_for('static', filename = 'plus-circle.svg' )}}" alt="">
+                    Agregar
+                </a>
+            </div>
+        </div>
+    </div>
     <div class = "container">
         <div class="row align-items-start">
             {% for entrada in entradas %}
@@ -25,5 +38,28 @@
         </div>
     </div>
     <br>
-    <h2>Salidas</h2>
+    <div class="container">
+        <div class="row align-items-start">
+            <div class="col">
+                <h2>Salidas</h2>
+            </div>
+            <div class="col">
+                <a href = "{{ url_for('operacion', tipo = 'salida') }}" class="btn btn-light" style="background-color: #CBFA8E;">
+                    <img src="{{ url_for('static', filename = 'plus-circle.svg' )}}" alt="">
+                    Agregar
+                </a>
+            </div>
+        </div>
+    </div>
+    <br>
+    <div class = "container">
+        <div class="row align-items-start">
+            {% for salida in salidas %}
+                <div class="col-3">
+                    {{ comp.render_operation(salida) }}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+        
 {% endblock %}

@@ -5,3 +5,7 @@ def calcular_total(billetes):
             int(billetes[2]) * 100 + \
                 int(billetes[3]) * 200 + \
                     int(billetes[4]) * 500 + int(billetes[5]) * 1000
+
+def obtener_billetes(billetes):
+    billetes = billetes.split()
+    return billetes
