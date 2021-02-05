@@ -17,8 +17,8 @@ class Operacion(db.Model):
 class Resumen(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     fecha = db.Column(db.Date, index = True, default = datetime.today)
-    cambio = db.Column(db.Float)
-    total = db.Column(db.Float)
+    cambio = db.Column(db.Float, default = 0.0)
+    total = db.Column(db.Float, default = 0.0)
 
     def __repr__(self):
         return f'Resumen de {self.fecha} con total {self.total} y cambio {self.cambio}'
