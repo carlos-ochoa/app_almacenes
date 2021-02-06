@@ -12,6 +12,11 @@
         <div class = "col">
             <p>Cambio en monedas: ${{ cambio }}</p>
         </div>
+        <div class="row align-items-start">
+            <div class="col">
+                <a href="{{ url_for('cambiar', cambio_total = cambio) }}">Cambiar monedas</a>
+            </div>
+        </div>
     </div>
     <br>
 
@@ -61,5 +66,6 @@
             {% endfor %}
         </div>
     </div>
+
         
 {% endblock %}

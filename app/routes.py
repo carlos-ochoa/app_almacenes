@@ -2,7 +2,7 @@ from flask import render_template, redirect, url_for, request, flash
 from datetime import datetime, timedelta
 from app import app
 from app import db
-from app.forms import OperacionForm, OperacionSalidaForm
+from app.forms import OperacionForm, OperacionSalidaForm, CambioForm
 from app.models import Operacion, Resumen
 from app.ops import calcular_total, obtener_billetes
 
@@ -65,7 +65,7 @@ def resumen():
 @app.route('/caja')
 def caja():
     fecha = datetime.today().strftime('%Y-%m-%d')
-    ayer = datetime.today() - timedelta(days = 1)
+    ayer = (datetime.today() - timedelta(days = 1)).strftime('%Y-%m-%d')
     entradas = Operacion.query.filter_by(tipo = 'entrada', fecha = fecha).all()
     salidas = Operacion.query.filter_by(tipo = 'salida', fecha = fecha).all()
     r = Resumen.query.filter_by(fecha = fecha).first()
@@ -78,6 +78,32 @@ def caja():
     elif r is None and r_ayer is None:
         cambio = 0.0
     return render_template('caja.html', saldo_total = saldo_total, cambio = cambio, entradas = entradas, salidas = salidas)
+
+@app.route('/cambiar/', methods = ['GET','POST'])
+def cambiar():
+    cambio_total = request.args.get('cambio_total')
+    form = CambioForm()
+    if request.method == 'POST':
+        if form.validate_on_submit:
+            if form.cantidad_cambiar.data > cambio_total:
+                flash('La cantidad a cambiar no puede ser superior al cambio en monedas existente')
+                return redirect(url_for('caja'))
+            fecha = datetime.today().strftime('%Y-%m-%d')
+            r = Resumen.query.filter_by(fecha = fecha).first()
+            if r is None:
+                flash('No hay registros monetarios')
+                return redirect(url_for('caja'))
+            if r.cambio == 0.0:
+                flash('La cantidad a cambiar no puede ser superior al cambio en monedas existente')
+                return redirect(url_for('caja'))
+            r.cambio -= form.cantidad_cambiar.data
+            r.total += form.cantidad_cambiar.data
+            db.session.commit()
+            return redirect(url_for('caja'))
+    return render_template('cambio.html', form = form)
+
+            
+            
 
 @app.route('/ver/<int:id>', methods = ['GET','POST'])
 def ver(id):

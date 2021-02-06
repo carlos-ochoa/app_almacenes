@@ -19,6 +19,7 @@ class Resumen(db.Model):
     fecha = db.Column(db.Date, index = True, default = datetime.today)
     cambio = db.Column(db.Float, default = 0.0)
     total = db.Column(db.Float, default = 0.0)
+    balance_billetes = db.Column(db.String(60))
 
     def __repr__(self):
         return f'Resumen de {self.fecha} con total {self.total} y cambio {self.cambio}'
