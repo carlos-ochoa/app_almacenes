@@ -25,6 +25,11 @@ class OperacionSalidaForm(FlaskForm):
     submit = SubmitField('Crear')
 
 class CambioForm(FlaskForm):
-    cantidad_cambiar = IntegerField('Total a cambiar', validators = [DataRequired()])
-    submit = SubmitField('Crear')
+    billetes_20 = IntegerField('Billetes de 20 usados', validators = [Optional()], default = 0, widget = NumberInput(min = 0))
+    billetes_50 = IntegerField('Billetes de 50 usados', validators = [Optional()], default = 0, widget = NumberInput(min = 0))
+    billetes_100 = IntegerField('Billetes de 100 usados', validators = [Optional()], default = 0, widget = NumberInput(min = 0))
+    billetes_200 = IntegerField('Billetes de 200 usados', validators = [Optional()], default = 0, widget = NumberInput(min = 0))
+    billetes_500 = IntegerField('Billetes de 500 usados', validators = [Optional()], default = 0, widget = NumberInput(min = 0))
+    billetes_1000 = IntegerField('Billetes de 1000 usados', validators = [Optional()], default = 0, widget = NumberInput(min = 0))
+    submit = SubmitField('Cambiar')
 
