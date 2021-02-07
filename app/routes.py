@@ -4,7 +4,7 @@ from app import app
 from app import db
 from app.forms import OperacionForm, OperacionSalidaForm, CambioForm
 from app.models import Operacion, Resumen
-from app.ops import calcular_total, obtener_billetes
+from app.ops import calcular_total, obtener_billetes, actualizar_balance, verificar_balance
 
 
 @app.route('/operacion/entrada', methods = ['GET','POST'])
@@ -21,11 +21,11 @@ def operacion():
             r = Resumen.query.filter_by(fecha = fecha).first()   
             print(r)
             if r is not None:
-                print('aqui')
                 r.total += total
+                r.balance_billetes = actualizar_balance(billetes_str, r.balance_billetes, tipo = 'entrada')
             else:
-                print('x2')
                 r = Resumen(total = total, cambio = 0.0)
+                r.balance_billetes = actualizar_balance(billetes_str, r.balance_billetes, tipo = 'entrada')
                 db.session.add(r)
             db.session.commit()
             return redirect(url_for('caja'))
@@ -47,11 +47,23 @@ def operacion_salida():
             r = Resumen.query.filter_by(fecha = fecha).first()
             cambio_parcial = calcular_total(billetes_str) - float(total)    
             if r is not None:
-                r.total -= float(total)
-                r.cambio += cambio_parcial
+                balance_nuevo = actualizar_balance(billetes_str, r.balance_billetes, tipo = 'salida')
+                if float(total) > r.total or not verificar_balance(balance_nuevo):
+                    flash('El total de la salida no puede superar al dinero en caja')
+                    return redirect(url_for('caja'))
+                else:
+                    r.total -= float(total)
+                    r.cambio += cambio_parcial
+                    r.balance_billetes = balance_nuevo
             else:
-                r = Resumen(total = total, cambio = cambio_parcial)
-                db.session.add(r)
+                balance_nuevo = actualizar_balance(billetes_str, r.balance_billetes, tipo = 'salida')
+                if float(total) > r.total or not verificar_balance(balance_nuevo):
+                    flash('El total de la salida no puede superar al dinero en caja')
+                    return redirect(url_for('caja'))
+                else:
+                    r = Resumen(total = total, cambio = cambio_parcial)
+                    r.balance_billetes = balance_nuevo
+                    db.session.add(r)
             db.session.commit()
             return redirect(url_for('caja'))
         else:
@@ -70,14 +82,21 @@ def caja():
     salidas = Operacion.query.filter_by(tipo = 'salida', fecha = fecha).all()
     r = Resumen.query.filter_by(fecha = fecha).first()
     r_ayer = Resumen.query.filter_by(fecha = ayer).first()
-    saldo_total = r.total if r is not None else 0.0
-    if r is not None and r_ayer is not None:
-        cambio = r_ayer.cambio + r.cambio
-    elif r is not None and r_ayer is None:
-        cambio = r.cambio
-    elif r is None and r_ayer is None:
-        cambio = 0.0
-    return render_template('caja.html', saldo_total = saldo_total, cambio = cambio, entradas = entradas, salidas = salidas)
+    if r is not None:
+        balance = r.balance_billetes
+        saldo total = r.total
+        if r_ayer is not None:
+            cambio = r_ayer.cambio + r.cambio    
+        else:
+            cambio = r.cambio
+    else:
+        balance_billetes = '0 0 0 0 0 0'
+        saldo_total = 0.0
+        if r_ayer is None:
+            cambio = 0.0
+        else:
+            cambio = r_ayer.cambio
+    return render_template('caja.html', saldo_total = saldo_total, cambio = cambio, entradas = entradas, salidas = salidas, balance = balance_billetes.split())
 
 @app.route('/cambiar/', methods = ['GET','POST'])
 def cambiar():
