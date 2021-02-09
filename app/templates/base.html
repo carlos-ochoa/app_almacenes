@@ -18,8 +18,9 @@
                   </button>
                   <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
                     <div class="navbar-nav">
-                      <a class="nav-link active" aria-current="page" href="#">Caja</a>
-                      <a class="nav-link" href="#">Búsqueda</a>
+                      <a class="nav-link active" aria-current="page" href="{{ url_for('caja') }}">Caja</a>
+                      <a class="nav-link active" href="{{ url_for('buscarFecha') }}">Búsqueda por fecha</a>
+                      <a class="nav-link active" href="{{ url_for('buscarSalida') }}">Búsqueda de salidas</a>
                     </div>
                   </div>
                 </div>

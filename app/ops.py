@@ -11,7 +11,7 @@ def obtener_billetes(billetes):
     return billetes
 
 def actualizar_balance(billetes_operacion, balance_actual, tipo):
-    billetes_operacion = list(map(billetes_operacion.split()))
+    billetes_operacion = list(map(int,billetes_operacion.split()))
     balance_actual = list(map(int,balance_actual.split()))
     if tipo == 'entrada':
         balance_actual = list(map(lambda x,y : x + y, balance_actual, billetes_operacion))

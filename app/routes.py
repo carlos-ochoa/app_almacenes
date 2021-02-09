@@ -2,7 +2,7 @@ from flask import render_template, redirect, url_for, request, flash
 from datetime import datetime, timedelta
 from app import app
 from app import db
-from app.forms import OperacionForm, OperacionSalidaForm, CambioForm
+from app.forms import OperacionForm, OperacionSalidaForm, CambioForm, BusquedaFechaForm, BusquedaSalidaForm
 from app.models import Operacion, Resumen
 from app.ops import calcular_total, obtener_billetes, actualizar_balance, verificar_balance
 
@@ -24,7 +24,7 @@ def operacion():
                 r.balance_billetes = actualizar_balance(billetes_str, r.balance_billetes, tipo = 'entrada')
             else:
                 r = Resumen(total = total, cambio = 0.0)
-                r.balance_billetes = actualizar_balance(billetes_str, r.balance_billetes, tipo = 'entrada')
+                r.balance_billetes = actualizar_balance(billetes_str, '0 0 0 0 0 0', tipo = 'entrada')
                 db.session.add(r)
             db.session.commit()
             return redirect(url_for('caja'))
@@ -73,6 +73,7 @@ def operacion_salida():
 def resumen():
     return "Hola mundo"
 
+@app.route('/')
 @app.route('/caja')
 def caja():
     denominaciones = ['20','50','100','200','500','1000']
@@ -153,3 +154,28 @@ def eliminar(id):
     db.session.delete(operacion)
     db.session.commit()
     return redirect(url_for('caja'))
+
+@app.route('/buscar_por_fecha', methods = ['GET','POST'])
+def buscarFecha():
+    form = BusquedaFechaForm()
+    r, entradas, salidas = None, [], []
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            denominaciones = ['20','50','100','200','500','1000']
+            r = Resumen.query.filter_by(fecha = form.fecha.data).first()
+            entradas = Operacion.query.filter_by(fecha = form.fecha.data, tipo = 'entrada').all()
+            salidas = Operacion.query.filter_by(fecha = form.fecha.data, tipo = 'salida').all()
+    return render_template('busquedaFecha.html', form = form, r = r, entradas = entradas, salidas = salidas)
+
+@app.route('/buscar_por_concepto', methods = ['GET','POST'])
+def buscarSalida():
+    form = BusquedaSalidaForm()
+    salidas = []
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            concepto = form.concepto.data
+            salidas = Operacion.query.filter((Operacion.concepto.contains(concepto)) & (Operacion.tipo == 'salida')).all()
+    return render_template('busquedaSalida.html', form = form, salidas = salidas)
+
+        
+          

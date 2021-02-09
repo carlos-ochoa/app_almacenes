@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, IntegerField, SubmitField, DecimalField
-from wtforms.widgets.html5 import NumberInput
+from wtforms import StringField, IntegerField, SubmitField, DecimalField, DateField
+from wtforms.widgets.html5 import NumberInput, DateInput
 from wtforms.validators import DataRequired, Optional
 
 class OperacionForm(FlaskForm):
@@ -33,3 +33,10 @@ class CambioForm(FlaskForm):
     billetes_1000 = IntegerField('Billetes de 1000 usados', validators = [Optional()], default = 0, widget = NumberInput(min = 0))
     submit = SubmitField('Cambiar')
 
+class BusquedaFechaForm(FlaskForm):
+    fecha = DateField('Fecha', validators=[DataRequired()], widget = DateInput())
+    submit = SubmitField('Buscar')
+
+class BusquedaSalidaForm(FlaskForm):
+    concepto = StringField('Concepto o nombre', validators=[DataRequired()])
+    submit = SubmitField('Buscar')

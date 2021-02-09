@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% import 'bootstrap/wtf.html' as wtf %}
+{% import 'components.html' as comp %}
+
+{% block app_content %}
+    <br>
+    <h1>Búsqueda de estado por fecha</h1>
+    <div class = "row">
+        <div class = "col-md-4">
+            {{wtf.quick_form(form)}}
+        </div>
+    </div>
+    <br>
+    <div class="container">
+        <div class="row align-items-start">
+            {% if r %}
+                <div class="col">
+                    <div class="col">
+                        <p>Total en billetes: ${{ r.balance_billetes }}</p>
+                    </div>
+                    <div class = "col">
+                        <p>Cambio en monedas: ${{ r.cambio }}</p>
+                    </div>
+                    <div class = "col">
+                        <p>Saldo total: ${{ r.total }}</p>
+                    </div>
+                </div>    
+            {% endif %}
+            
+        </div>
+    </div>
+    <br>
+
+    <div class="container">
+        <div class="row align-items-start">
+            <div class="col">
+                <h2>Entradas</h2>
+            </div>
+        </div>
+    </div>
+    <div class = "container">
+        <div class="row align-items-start">
+            {% for entrada in entradas %}
+                <div class="col-3">
+                    {{ comp.render_operation(entrada) }}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    <br>
+    <div class="container">
+        <div class="row align-items-start">
+            <div class="col">
+                <h2>Salidas</h2>
+            </div>
+        </div>
+    </div>
+    <br>
+    <div class = "container">
+        <div class="row align-items-start">
+            {% for salida in salidas %}
+                <div class="col-3">
+                    {{ comp.render_operation(salida) }}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
