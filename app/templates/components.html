@@ -19,7 +19,7 @@
         Total: ${{ operation.total }}   
       </p>
       <div class="container text-end">
-          <a href = "{{ url_for('ver', id = operation.id) }}" class="btn btn-light" style="background-color: #B3E7E8;">
+          <a href = "{{ url_for('ver', tipo = operation.tipo, id = operation.id) }}" class="btn btn-light" style="background-color: #B3E7E8;">
               <img src="{{ url_for('static', filename = 'eye.svg' )}}" alt="">
               Ver
           </a>    
@@ -46,12 +46,12 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          ¿Está seguro de que desea eliminar la entrada con id: {{ operation.id }}?
+          ¿Está seguro de que desea eliminar la {{ operation.tipo }} con id: {{ operation.id }}?
           Esta acción no se puede deshacer.
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <a type="button" class="btn btn-danger" href="{{ url_for('eliminar', id = operation.id) }}">Eliminar</a>
+          <a type="button" class="btn btn-danger" href="{{ url_for('eliminar', tipo = operation.tipo, id = operation.id) }}">Eliminar</a>
         </div>
       </div>
     </div>

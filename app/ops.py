@@ -27,3 +27,17 @@ def verificar_balance(balance):
     if len(negativos) > 0:
         balance_correcto = False
     return balance_correcto
+
+def actualizar_balance_verificado(balance_anterior, billetes_nuevo, billetes_operacion, tipo):
+    balance_anterior = list(map(int,balance_anterior.split()))
+    billetes_nuevo = list(map(int,billetes_nuevo.split()))
+    billetes_operacion = list(map(int,billetes_operacion.split()))
+    mascara = list(map(lambda x,y : x != y, billetes_nuevo, billetes_operacion))
+    for index,cambiar in enumerate(mascara):
+        if cambiar:
+            if tipo == 'entrada':
+                balance_anterior[index] += billetes_nuevo[index]
+            else:
+                balance_anterior[index] -= billetes_nuevo[index]
+    balance_actual = ' '.join(str(b) for b in balance_anterior)
+    return balance_actual

@@ -26,7 +26,7 @@
 
 <br><br>
 <div class="container">
-  <h1>Nueva operación de {{tipo}}</h1>
+  <h1>Operación de {{tipo}}</h1>
   <div class = "row">
       <div class = "col-md-4">
           {{wtf.quick_form(form)}}
@@ -43,12 +43,12 @@
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-              ¿Está seguro de que desea eliminar la entrada con id: {{ operacion.id }}?
+              ¿Está seguro de que desea eliminar la {{ operacion.tipo }} con id: {{ operacion.id }}?
               Esta acción no se puede deshacer.
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-              <a type="button" class="btn btn-danger" href="{{ url_for('eliminar', id = operacion.id) }}">Eliminar</a>
+              <a type="button" class="btn btn-danger" href="{{ url_for('eliminar', tipo = operacion.tipo, id = operacion.id) }}">Eliminar</a>
             </div>
           </div>
         </div>
