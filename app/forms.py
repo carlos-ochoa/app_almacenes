@@ -16,6 +16,7 @@ class OperacionForm(FlaskForm):
 class OperacionSalidaForm(FlaskForm):
     concepto = StringField('Concepto de operación', validators = [DataRequired()])
     total = DecimalField('Total de la salida', validators = [DataRequired()])
+    monedas = DecimalField('Total en monedas usadas', validators=[Optional()], default = 0.0)
     billetes_20 = IntegerField('Billetes de 20 usados', validators = [Optional()], default = 0, widget = NumberInput(min = 0))
     billetes_50 = IntegerField('Billetes de 50 usados', validators = [Optional()], default = 0, widget = NumberInput(min = 0))
     billetes_100 = IntegerField('Billetes de 100 usados', validators = [Optional()], default = 0, widget = NumberInput(min = 0))

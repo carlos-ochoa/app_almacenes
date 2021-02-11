@@ -82,6 +82,19 @@
             {% endfor %}
         </div>
     </div>
+    <br>
+    <div class = "container">
+        {% if cambios %}
+            <h2>Cambios de monedas</h2>
+            <div class="row align-items-start">
+                {% for cam in cambios %}
+                    <div class="col-3">
+                        {{ comp.render_operation_search(cam) }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
 
         
 {% endblock %}

@@ -13,6 +13,9 @@
                     <div>{{ cantidad }} x {{ billete }}</div>
                 {% endfor %}
             </div>
+            <div class="col">
+                <p>Cambio en monedas: ${{ info_cambio }}</p>
+            </div>
         {% endif %}
         <div class = "col-md-12">
             {{wtf.quick_form(form)}}
