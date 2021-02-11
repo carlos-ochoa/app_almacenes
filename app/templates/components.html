@@ -23,17 +23,23 @@
               <img src="{{ url_for('static', filename = 'eye.svg' )}}" alt="">
               Ver
           </a>    
-          <!--    
-          <button class="btn btn-light" style="background-color: #B3E7E8;">
-            <img src="{{ url_for('static', filename = 'pencil.svg' )}}" alt="">
-          </button>
-          <a href = "{{ url_for('ver', id = operation.id) }}" class="btn btn-light" style="background-color: #F56F6B;"">
-            <img src="{{ url_for('static', filename = 'trash.svg' )}}" alt="">
-          </a> -->
       </div>  
     </div>
   </div>
 
+{% endmacro %}
+
+{% macro render_operation_search(operation) %}
+  <div class="card" style="width: 15rem;">
+    <div class="card-body">
+      <h5 class="card-title">
+          {{ operation.concepto }}
+      </h5>
+      <p class="card-text">
+        Total: ${{ operation.total }}   
+      </p>
+    </div>
+  </div>
 {% endmacro %}
 
 {% macro render_modal(operation) %}

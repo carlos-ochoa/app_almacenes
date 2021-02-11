@@ -34,7 +34,16 @@ def operacion():
 
 @app.route('/operacion/salida', methods = ['GET','POST'])
 def operacion_salida():
+    denominaciones = ['20','50','100','200','500','1000']
+    balance_impresion = {}
     form = OperacionSalidaForm()
+    if request.method == 'GET':
+        fecha = datetime.today().strftime('%Y-%m-%d')
+        r = Resumen.query.filter_by(fecha = fecha).first()
+        if r:
+            balance_impresion = dict(zip(denominaciones, r.balance_billetes.split()))
+        else:
+            balance_impresion = dict(zip(denominaciones, '0 0 0 0 0 0'.split()))
     if request.method == 'POST':
         if form.validate_on_submit():
             billetes_str =  f'{form.billetes_20.data} {form.billetes_50.data} {form.billetes_100.data} \
@@ -67,7 +76,7 @@ def operacion_salida():
             return redirect(url_for('caja'))
         else:
             flash('Ha ocurrido un error en la alta de la operación')
-    return render_template('operacion.html',title = 'Operaciones', form = form, tipo = 'salida')
+    return render_template('operacion.html',title = 'Operaciones', form = form, tipo = 'salida', balance = balance_impresion)
 
 @app.route('/')
 @app.route('/caja')

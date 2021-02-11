@@ -42,7 +42,7 @@
         <div class="row align-items-start">
             {% for entrada in entradas %}
                 <div class="col-3">
-                    {{ comp.render_operation(entrada) }}
+                    {{ comp.render_operation_search(entrada) }}
                 </div>
             {% endfor %}
         </div>
@@ -60,7 +60,7 @@
         <div class="row align-items-start">
             {% for salida in salidas %}
                 <div class="col-3">
-                    {{ comp.render_operation(salida) }}
+                    {{ comp.render_operation_search(salida) }}
                 </div>
             {% endfor %}
         </div>

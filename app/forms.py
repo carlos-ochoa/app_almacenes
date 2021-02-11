@@ -11,7 +11,7 @@ class OperacionForm(FlaskForm):
     billetes_200 = IntegerField('Billetes de 200 usados', validators = [Optional()], default = 0, widget = NumberInput(min = 0))
     billetes_500 = IntegerField('Billetes de 500 usados', validators = [Optional()], default = 0, widget = NumberInput(min = 0))
     billetes_1000 = IntegerField('Billetes de 1000 usados', validators = [Optional()], default = 0, widget = NumberInput(min = 0))
-    submit = SubmitField('Crear')
+    submit = SubmitField('Guardar')
 
 class OperacionSalidaForm(FlaskForm):
     concepto = StringField('Concepto de operación', validators = [DataRequired()])
