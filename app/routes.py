@@ -52,7 +52,7 @@ def operacion_salida():
             billetes_str =  f'{form.billetes_20.data} {form.billetes_50.data} {form.billetes_100.data} \
                 {form.billetes_200.data} {form.billetes_500.data} {form.billetes_1000.data}'
             total = form.total.data
-            o = Operacion(concepto = form.concepto.data, billetes = billetes_str, total = total, tipo = 'salida')
+            o = Operacion(concepto = form.concepto.data, billetes = billetes_str, total = total,monedas = monedas, tipo = 'salida')
             db.session.add(o)
             fecha = datetime.today().strftime('%Y-%m-%d')
             r = Resumen.query.filter_by(fecha = fecha).first()
@@ -110,6 +110,9 @@ def caja():
         else:
             cambio = r.cambio
     else:
+        r = Resumen()
+        db.session.add(r)
+        db.session.commit()
         balance = dict(zip(denominaciones,'0 0 0 0 0 0'.split()))
         total_billetes = 0.0
         saldo_total = 0.0
@@ -166,18 +169,30 @@ def ver():
             if balance_valido:
                 operacion.concepto = form.concepto.data
                 operacion.billetes = billetes_str
-                operacion.total = calcular_total(billetes_str)
+                if tipo == 'salida':
+                    operacion.monedas = form.monedas.data
+                    operacion.total = calcular_total(billetes_str) + float(form.monedas.data)
+                    r.cambio += float(form.monedas.data)
+                else:
+                    operacion.total = calcular_total(billetes_str)
                 r.balance_billetes = balance_final
-                r.total = calcular_total(r.balance_billetes)
+                r.total = calcular_total(r.balance_billetes) + r.cambio
                 db.session.commit()
             else:
                 flash('Balance de billetes no válido')
             return redirect(url_for('caja'))
     if request.method == 'GET':
-        form = OperacionForm(concepto = operacion.concepto, billetes_20 = billetes[0], \
-            billetes_50 = billetes[1], billetes_100 = billetes[2], \
-            billetes_200 = billetes[3], billetes_500 = billetes[4], \
-            billetes_1000 = billetes[5])
+        if tipo == 'entrada':
+            form = OperacionForm(concepto = operacion.concepto, billetes_20 = billetes[0], \
+                billetes_50 = billetes[1], billetes_100 = billetes[2], \
+                billetes_200 = billetes[3], billetes_500 = billetes[4], \
+                billetes_1000 = billetes[5])
+        elif tipo == 'salida':
+            form = OperacionSalidaForm(concepto = operacion.concepto, total = operacion.total, \
+                monedas = operacion.monedas, billetes_20 = billetes[0], \
+                billetes_50 = billetes[1], billetes_100 = billetes[2], \
+                billetes_200 = billetes[3], billetes_500 = billetes[4], \
+                billetes_1000 = billetes[5])
     return render_template('ver.html', operacion = operacion, form = form)
 
 @app.route('/eliminar')
@@ -188,8 +203,10 @@ def eliminar():
     operacion = Operacion.query.filter_by(id = id).first()
     r = Resumen.query.filter_by(fecha = fecha).first()
     tipo_operacion = 'salida' if tipo == 'entrada' else 'entrada'
+    if tipo == 'salida':
+        r.cambio += operacion.monedas
     r.balance_billetes = actualizar_balance(operacion.billetes, r.balance_billetes, tipo = tipo_operacion)
-    r.total = calcular_total(r.balance_billetes)
+    r.total = calcular_total(r.balance_billetes) + r.cambio    
     db.session.delete(operacion)
     db.session.commit()
     return redirect(url_for('caja'))
@@ -203,7 +220,8 @@ def buscarFecha():
         if form.validate_on_submit():
             denominaciones = ['20','50','100','200','500','1000']
             r = Resumen.query.filter_by(fecha = form.fecha.data).first()
-            total_billetes = calcular_total(r.balance_billetes)
+            if r is not None:
+                total_billetes = calcular_total(r.balance_billetes)
             entradas = Operacion.query.filter_by(fecha = form.fecha.data, tipo = 'entrada').all()
             salidas = Operacion.query.filter_by(fecha = form.fecha.data, tipo = 'salida').all()
     return render_template('busquedaFecha.html', form = form, r = r, entradas = entradas, salidas = salidas, total_billetes = total_billetes)
@@ -218,5 +236,11 @@ def buscarSalida():
             salidas = Operacion.query.filter((Operacion.concepto.contains(concepto)) & (Operacion.tipo == 'salida')).all()
     return render_template('busquedaSalida.html', form = form, salidas = salidas)
 
-        
+@app.route('/vaciar_caja')
+def vaciar_caja():
+    fecha = datetime.today().strftime('%Y-%m-%d')
+    r = Resumen.query.filter_by(fecha = fecha).first()
+    r.caja_entregada = True
+    db.session.commit()
+    return redirect(url_for('caja'))
           

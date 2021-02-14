@@ -19,7 +19,7 @@
         Total: ${{ operation.total }}   
       </p>
       <div class="container text-end">
-          <a href = "{{ url_for('ver', tipo = operation.tipo, id = operation.id) }}" class="btn btn-light" style="background-color: #B3E7E8;">
+          <a href = "{{ url_for('ver', tipo = operation.tipo, id = operation.id) }}" class="btn btn-light" style="background-color: #a7a6a5;">
               <img src="{{ url_for('static', filename = 'eye.svg' )}}" alt="">
               Ver
           </a>    
@@ -37,6 +37,20 @@
       </h5>
       <p class="card-text">
         Total: ${{ operation.total }}   
+      </p>
+    </div>
+  </div>
+{% endmacro %}
+
+{% macro render_operation_search_salida(operation) %}
+  <div class="card" style="width: 15rem;">
+    <div class="card-body">
+      <h5 class="card-title">
+          {{ operation.concepto }}
+      </h5>
+      <p class="card-text">
+        <p>Fecha: {{ operation.fecha }}</p>
+        <p>Total: ${{ operation.total }}</p>
       </p>
     </div>
   </div>

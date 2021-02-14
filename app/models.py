@@ -9,6 +9,7 @@ class Operacion(db.Model):
     fecha = db.Column(db.Date, index = True, default = datetime.today)
     total = db.Column(db.Float)
     billetes = db.Column(db.String(18))
+    monedas = db.Column(db.Float, default = 0.0)
     tipo = db.Column(db.String(7), index = True)
 
     def __repr__(self):
@@ -20,6 +21,7 @@ class Resumen(db.Model):
     cambio = db.Column(db.Float, default = 0.0)
     total = db.Column(db.Float, default = 0.0)
     balance_billetes = db.Column(db.String(60), default = '0 0 0 0 0 0')
+    caja_entregada = db.Column(db.Boolean, default = False)
 
     def __repr__(self):
         return f'Resumen de {self.fecha} con total {self.total} y cambio {self.cambio}'

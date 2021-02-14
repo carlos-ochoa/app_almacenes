@@ -10,7 +10,7 @@
             <div class = "col">
                 <p>Billetes: </p>
                 {% for billete,cantidad in balance.items() %}
-                    <p>{{ cantidad }} x {{ billete }}</p>
+                    <p>{{ cantidad }} x {{ billete }} = ${{ cantidad|int * billete|int }} </p>
                 {% endfor %}
             </div>
             <div class="col">
@@ -25,10 +25,15 @@
                 </div>
                 <div class="row align-items-start">
                     <div class="col">
-                        <a href = "{{ url_for('cambiar', cambio_total = cambio) }}" class="btn btn-light" style="background-color: #B3E7E8;">
+                        <a href = "{{ url_for('cambiar', cambio_total = cambio) }}" class="btn btn-light" style="background-color: #ae914b;">
                             <img src="{{ url_for('static', filename = 'cash.svg' )}}" alt="">
                             Cambiar monedas
                         </a>
+                        <br><br>
+                        <button class="btn btn-light" style="background-color: #26bd60;" data-bs-toggle="modal" data-bs-target="#Modal1">
+                            <img src="{{ url_for('static', filename = 'wallet2.svg' )}}" alt="">
+                            Vaciar caja
+                        </button>
                     </div>
                 </div>
             </div>
@@ -42,7 +47,7 @@
                 <h2>Entradas</h2>
             </div>
             <div class="col">
-                <a href = "{{ url_for('operacion', tipo = 'entrada') }}" class="btn btn-light" style="background-color: #CBFA8E;">
+                <a href = "{{ url_for('operacion', tipo = 'entrada') }}" class="btn btn-light" style="background-color: #ae914b;">
                     <img src="{{ url_for('static', filename = 'plus-circle.svg' )}}" alt="">
                     Agregar
                 </a>
@@ -65,7 +70,7 @@
                 <h2>Salidas</h2>
             </div>
             <div class="col">
-                <a href = "{{ url_for('operacion_salida', tipo = 'salida') }}" class="btn btn-light" style="background-color: #CBFA8E;">
+                <a href = "{{ url_for('operacion_salida', tipo = 'salida') }}" class="btn btn-light" style="background-color: #ae914b;">
                     <img src="{{ url_for('static', filename = 'plus-circle.svg') }}" alt="">
                     Agregar
                 </a>
@@ -96,5 +101,22 @@
         {% endif %}
     </div>
 
-        
+    <div class="modal fade" id="Modal1" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="staticBackdropLabel">Vaciar caja</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  ¿Está seguro de que desea vaciar y entregar la caja del día?
+                  Esta acción no se puede deshacer.
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                  <a type="button" class="btn btn-primary" href="{{ url_for('vaciar_caja') }}">Entregar</a>
+                </div>
+              </div>
+            </div>
+        </div>
 {% endblock %}

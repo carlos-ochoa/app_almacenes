@@ -24,6 +24,15 @@
                     <div class = "col">
                         <p>Saldo total: ${{ r.total }}</p>
                     </div>
+                    {% if r.caja_entregada %}
+                        <div class="col">
+                            <p>Caja vaciada y entregada : <b>Sí</b></p>        
+                        </div>
+                    {% else %}
+                        <div class="col">
+                            <p>Caja vaciada y entregada : <b>No</b></p>        
+                        </div>
+                    {% endif %}
                 </div>    
             {% endif %}
             
