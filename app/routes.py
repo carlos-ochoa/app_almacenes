@@ -2,12 +2,14 @@ from flask import render_template, redirect, url_for, request, flash
 from datetime import datetime, timedelta
 from app import app
 from app import db
-from app.forms import OperacionForm, OperacionSalidaForm, CambioForm, BusquedaFechaForm, BusquedaSalidaForm
-from app.models import Operacion, Resumen
+from app.forms import OperacionForm, OperacionSalidaForm, CambioForm, BusquedaFechaForm, BusquedaSalidaForm, LoginForm
+from app.models import Operacion, Resumen, User
 from app.ops import calcular_total, obtener_billetes, actualizar_balance, verificar_balance, actualizar_balance_verificado
-
+from flask_login import current_user,login_user, logout_user, login_required
+from werkzeug.urls import url_parse
 
 @app.route('/operacion/entrada', methods = ['GET','POST'])
+@login_required
 def operacion():
     form = OperacionForm()
     if request.method == 'POST':
@@ -27,12 +29,13 @@ def operacion():
                 r.balance_billetes = actualizar_balance(billetes_str, '0 0 0 0 0 0', tipo = 'entrada')
                 db.session.add(r)
             db.session.commit()
-            return redirect(url_for('caja'))
+            return redirect(url_for('caja', actualizar_valores_caja = False))
         else:
             flash('Ha ocurrido un error en la alta de la operación')
     return render_template('operacion.html',title = 'Operaciones', form = form, tipo = 'entrada')
 
 @app.route('/operacion/salida', methods = ['GET','POST'])
+@login_required
 def operacion_salida():
     denominaciones = ['20','50','100','200','500','1000']
     info_cambio = 0.0
@@ -83,14 +86,16 @@ def operacion_salida():
                     r.balance_billetes = balance_nuevo
                     db.session.add(r)
             db.session.commit()
-            return redirect(url_for('caja'))
+            return redirect(url_for('caja', actualizar_valores_caja = False))
         else:
             flash('Ha ocurrido un error en la alta de la operación')
     return render_template('operacion.html',title = 'Operaciones', form = form, tipo = 'salida', balance = balance_impresion, info_cambio = info_cambio)
 
 @app.route('/')
 @app.route('/caja')
+@login_required
 def caja():
+    actualizar_valores_caja = request.args.get('actualizar_valores_caja')
     denominaciones = ['20','50','100','200','500','1000']
     fecha = datetime.today().strftime('%Y-%m-%d')
     ayer = (datetime.today() - timedelta(days = 1)).strftime('%Y-%m-%d')
@@ -102,28 +107,58 @@ def caja():
     if len(cambios) == 0:
         cambios = None
     if r is not None:
-        balance = dict(zip(denominaciones,r.balance_billetes.split()))
-        total_billetes = calcular_total(r.balance_billetes)
-        saldo_total = r.total
         if r_ayer is not None:
-            cambio = r_ayer.cambio + r.cambio    
+            # Este bloque de lineas provoca el bug
+            if actualizar_valores_caja == 'True':
+                r.total += r_ayer.total
+                r.cambio += r_ayer.cambio
+                r.balance_billetes = actualizar_balance(r_ayer.balance_billetes, r.balance_billetes, tipo = 'entrada')
+                total_billetes = calcular_total(r.balance_billetes)
+
+                balance = dict(zip(denominaciones,r.balance_billetes.split()))
+                total_billetes = calcular_total(r.balance_billetes)
+                saldo_total = r.total
+                cambio = r_ayer.cambio
+            else:
+                balance = dict(zip(denominaciones,r.balance_billetes.split()))
+                total_billetes = calcular_total(r.balance_billetes)
+                saldo_total = r.total
+                cambio = r_ayer.cambio    
         else:
+            balance = dict(zip(denominaciones,r.balance_billetes.split()))
+            total_billetes = calcular_total(r.balance_billetes)
+            saldo_total = r.total
             cambio = r.cambio
     else:
         r = Resumen()
         db.session.add(r)
-        db.session.commit()
-        balance = dict(zip(denominaciones,'0 0 0 0 0 0'.split()))
-        total_billetes = 0.0
-        saldo_total = 0.0
         if r_ayer is None:
+            balance = dict(zip(denominaciones,'0 0 0 0 0 0'.split()))
+            total_billetes = 0.0
+            saldo_total = 0.0
             cambio = 0.0
         else:
-            cambio = r_ayer.cambio
+            if actualizar_valores_caja:
+                r.total += r_ayer.total
+                r.cambio += r_ayer.cambio
+                r.balance_billetes = actualizar_balance(r_ayer.balance_billetes, r.balance_billetes, tipo = 'entrada')
+                total_billetes = calcular_total(r.balance_billetes)
+                
+                cambio = r_ayer.cambio
+                total_billetes = calcular_total(r_ayer.balance_billetes)
+                saldo_total = total_billetes + cambio
+                balance = r_ayer.balance_billetes
+            else:
+                cambio = r_ayer.cambio
+                total_billetes = calcular_total(r_ayer.balance_billetes)
+                saldo_total = total_billetes + cambio
+                balance = r_ayer.balance_billetes
+    db.session.commit()
     return render_template('caja.html', saldo_total = saldo_total, cambio = cambio, entradas = entradas, salidas = salidas, balance = balance, total_billetes = total_billetes, \
         cambios = cambios)
 
 @app.route('/cambiar/', methods = ['GET','POST'])
+@login_required
 def cambiar():
     cambio_total = request.args.get('cambio_total')
     form = CambioForm()
@@ -136,7 +171,7 @@ def cambiar():
             r = Resumen.query.filter_by(fecha = fecha).first()
             if r is None:
                 flash('No hay registros monetarios')
-                return redirect(url_for('caja'))
+                return redirect(url_for('caja', actualizar_valores_caja = False))
             if total > float(cambio_total) or r.cambio == 0.0:
                 flash('La cantidad a cambiar no puede ser superior al cambio en monedas existente')
                 return redirect(url_for('cambiar', cambio_total = cambio_total))
@@ -148,10 +183,11 @@ def cambiar():
                 o = Operacion(concepto = 'Cambio de monedas', total = total, billetes = billetes_str, tipo = 'cambio')
                 db.session.add(o)
             db.session.commit()
-            return redirect(url_for('caja'))
+            return redirect(url_for('caja', actualizar_valores_caja = False))
     return render_template('cambio.html', form = form)
 
 @app.route('/ver', methods = ['GET','POST'])
+@login_required
 def ver():
     id = request.args.get('id')
     tipo = request.args.get('tipo')
@@ -180,7 +216,7 @@ def ver():
                 db.session.commit()
             else:
                 flash('Balance de billetes no válido')
-            return redirect(url_for('caja'))
+            return redirect(url_for('caja', actualizar_valores_caja = False))
     if request.method == 'GET':
         if tipo == 'entrada':
             form = OperacionForm(concepto = operacion.concepto, billetes_20 = billetes[0], \
@@ -196,6 +232,7 @@ def ver():
     return render_template('ver.html', operacion = operacion, form = form)
 
 @app.route('/eliminar')
+@login_required
 def eliminar():
     id = request.args.get('id')
     tipo = request.args.get('tipo')
@@ -209,9 +246,10 @@ def eliminar():
     r.total = calcular_total(r.balance_billetes) + r.cambio    
     db.session.delete(operacion)
     db.session.commit()
-    return redirect(url_for('caja'))
+    return redirect(url_for('caja', actualizar_valores_caja = False))
 
 @app.route('/buscar_por_fecha', methods = ['GET','POST'])
+@login_required
 def buscarFecha():
     form = BusquedaFechaForm()
     r, entradas, salidas = None, [], []
@@ -227,6 +265,7 @@ def buscarFecha():
     return render_template('busquedaFecha.html', form = form, r = r, entradas = entradas, salidas = salidas, total_billetes = total_billetes)
 
 @app.route('/buscar_por_concepto', methods = ['GET','POST'])
+@login_required
 def buscarSalida():
     form = BusquedaSalidaForm()
     salidas = []
@@ -236,11 +275,34 @@ def buscarSalida():
             salidas = Operacion.query.filter((Operacion.concepto.contains(concepto)) & (Operacion.tipo == 'salida')).all()
     return render_template('busquedaSalida.html', form = form, salidas = salidas)
 
-@app.route('/vaciar_caja')
-def vaciar_caja():
-    fecha = datetime.today().strftime('%Y-%m-%d')
-    r = Resumen.query.filter_by(fecha = fecha).first()
-    r.caja_entregada = True
-    db.session.commit()
-    return redirect(url_for('caja'))
-          
+@app.route('/login', methods = ['GET','POST'])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('caja', actualizar_valores_caja = False))
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(nombre = form.username.data).first()
+        if user is None or not user.check_passwd(form.password.data):
+            flash('Usuario o clave inválidos')
+            return redirect(url_for('login'))
+        fecha = datetime.today().strftime('%Y-%m-%d')
+        ultimo_login_diario = user.ultimo_login_diario
+        print(fecha)
+        print(ultimo_login_diario)
+        actualizar_valores_caja = False if ultimo_login_diario == fecha else True
+        user.ultimo_login_diario = fecha
+        print(user.ultimo_login_diario)
+        db.session.commit()
+        login_user(user)
+        next_page = request.args.get('next')
+        if not next_page or url_parse(next_page).netloc != '' or url_parse(next_page) == '/caja' \
+            or url_parse(next_page) == '/':
+            next_page = url_for('caja', actualizar_valores_caja = actualizar_valores_caja)
+        return redirect(next_page)
+    return render_template('login.html', form = form)
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('login'))

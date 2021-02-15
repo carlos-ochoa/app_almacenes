@@ -2,6 +2,7 @@
     <head>
             <link rel="shortcut icon" href="{{ url_for('static', filename = 'icon.ico') }}">
             <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
             {% if title %}
             <title>{{title}} - Almacenes</title>
             {% else %}
@@ -13,7 +14,7 @@
         {% block navbar %}
             <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #211F20">
                 <div class="container-fluid">
-                  <a class="navbar-brand" href="{{ url_for('caja') }}">
+                  <a class="navbar-brand" href="{{ url_for('caja', actualizar_valores_caja = False) }}">
                     <img src="{{ url_for('static', filename = 'nombre.png')}}" width = "142" height="40" alt="">
                   </a>
                   <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
@@ -21,11 +22,18 @@
                   </button>
                   <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
                     <div class="navbar-nav">
-                      <a class="nav-link active" aria-current="page" href="{{ url_for('caja') }}">Caja</a>
+                      <a class="nav-link active" aria-current="page" href="{{ url_for('caja', actualizar_valores_caja = False) }}">Caja</a>
                       <a class="nav-link active" href="{{ url_for('buscarFecha') }}">Búsqueda por fecha</a>
                       <a class="nav-link active" href="{{ url_for('buscarSalida') }}">Búsqueda de salidas</a>
                     </div>
                   </div>
+                  <div class="collapse navbar-collapse w-100 order-3 dual-collapse2">
+                    <div class="navbar-nav">
+                      {% if not current_user.is_anonymous %}
+                        <a class="nav-link active" href="{{ url_for('logout') }}">Cerrar sesión</a>
+                      {% endif %}
+                    </div>
+                    </div>
                 </div>
             </nav>
         {% endblock %}

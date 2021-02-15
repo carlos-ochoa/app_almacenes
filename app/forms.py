@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, IntegerField, SubmitField, DecimalField, DateField
+from wtforms import StringField, IntegerField, SubmitField, DecimalField, DateField, PasswordField
 from wtforms.widgets.html5 import NumberInput, DateInput
 from wtforms.validators import DataRequired, Optional
 
@@ -41,3 +41,7 @@ class BusquedaFechaForm(FlaskForm):
 class BusquedaSalidaForm(FlaskForm):
     concepto = StringField('Concepto o nombre', validators=[DataRequired()])
     submit = SubmitField('Buscar')
+
+class LoginForm(FlaskForm):
+    username = StringField('Usuario', validators=[DataRequired()])
+    password = PasswordField('Contraseña', validators=[DataRequired()])

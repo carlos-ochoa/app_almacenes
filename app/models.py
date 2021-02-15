@@ -1,5 +1,7 @@
 from datetime import datetime
-from app import db
+from app import db,login
+from flask_login import UserMixin
+from werkzeug.security import generate_password_hash, check_password_hash
 
 class Operacion(db.Model):
     __tablename__ = 'operaciones'
@@ -25,3 +27,22 @@ class Resumen(db.Model):
 
     def __repr__(self):
         return f'Resumen de {self.fecha} con total {self.total} y cambio {self.cambio}'
+
+@login.user_loader
+def load_user(id):
+    return User.query.get(int(id))
+
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key = True)
+    nombre = db.Column(db.String(20), unique = True)
+    passwd_hash = db.Column(db.String(128))
+    ultimo_login_diario = db.Column(db.String(10))
+
+    def set_passwd(self, password):
+        self.passwd_hash = generate_password_hash(password)
+
+    def check_passwd(self, password):
+        return check_password_hash(self.passwd_hash,password)
+
+    def __repr__(self):
+        return f'User {self.nombre}'

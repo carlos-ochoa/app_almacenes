@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% import 'components.html' as comp %}
+{% block app_content %}
+    <div class="row d-flex justify-content-center">
+        <div class = "col-md-10 row align-items-start">
+                <div class="col d-flex justify-content-center">
+                    <img src="{{ url_for('static',filename = 'logo_white.jpg')}}" alt="" width="262" height="450">
+                </div>
+                <div class="col d-flex justify-content-center align-items-center" style="height: 450px;">
+                    <form action="" method="POST" novalidate>
+                        {{ form.hidden_tag() }}
+                        {{ comp.render_field(form.username) }}
+                        {{ comp.render_field(form.password) }}
+                        <input type="submit" class="btn btn-info" value="Ingresar">
+                    </form>
+                </div>
+            
+        </div>
+    </div>
+{% endblock %}
