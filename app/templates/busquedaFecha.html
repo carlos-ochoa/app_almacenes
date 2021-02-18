@@ -30,15 +30,9 @@
         </div>
     </div>
     <br>
-
-    <div class="container">
-        <div class="row align-items-start">
-            <div class="col">
-                <h2>Entradas</h2>
-            </div>
-        </div>
-    </div>
     <div class = "container">
+        {% if entradas %}
+        <h2>Entradas</h2>
         <div class="row align-items-start">
             {% for entrada in entradas %}
                 <div class="col-3">
@@ -46,17 +40,12 @@
                 </div>
             {% endfor %}
         </div>
-    </div>
-    <br>
-    <div class="container">
-        <div class="row align-items-start">
-            <div class="col">
-                <h2>Salidas</h2>
-            </div>
-        </div>
+        {% endif %}
     </div>
     <br>
     <div class = "container">
+        {% if salidas%}
+        <h2>Salidas</h2>
         <div class="row align-items-start">
             {% for salida in salidas %}
                 <div class="col-3">
@@ -64,5 +53,19 @@
                 </div>
             {% endfor %}
         </div>
+        {% endif %}
+    </div>
+    <br>
+    <div class = "container">
+        {% if cambios %}
+        <h2>Cambios</h2>
+        <div class="row align-items-start">
+            {% for cambio in cambios %}
+                <div class="col-3">
+                    {{ comp.render_operation_search(cambio) }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
     </div>
 {% endblock %}

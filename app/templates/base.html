@@ -6,7 +6,7 @@
             {% if title %}
             <title>{{title}} - Almacenes</title>
             {% else %}
-            <title>Almacenes</title>
+            <title>Cebollas - El sultán</title>
             {% endif %}
         
     </head>
@@ -14,7 +14,7 @@
         {% block navbar %}
             <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #211F20">
                 <div class="container-fluid">
-                  <a class="navbar-brand" href="{{ url_for('caja', actualizar_valores_caja = False) }}">
+                  <a class="navbar-brand" href="{{ url_for('caja') }}">
                     <img src="{{ url_for('static', filename = 'nombre.png')}}" width = "142" height="40" alt="">
                   </a>
                   <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
@@ -22,7 +22,7 @@
                   </button>
                   <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
                     <div class="navbar-nav">
-                      <a class="nav-link active" aria-current="page" href="{{ url_for('caja', actualizar_valores_caja = False) }}">Caja</a>
+                      <a class="nav-link active" aria-current="page" href="{{ url_for('caja') }}">Caja</a>
                       <a class="nav-link active" href="{{ url_for('buscarFecha') }}">Búsqueda por fecha</a>
                       <a class="nav-link active" href="{{ url_for('buscarSalida') }}">Búsqueda de salidas</a>
                     </div>

@@ -23,10 +23,10 @@ class Resumen(db.Model):
     cambio = db.Column(db.Float, default = 0.0)
     total = db.Column(db.Float, default = 0.0)
     balance_billetes = db.Column(db.String(60), default = '0 0 0 0 0 0')
-    caja_entregada = db.Column(db.Boolean, default = False)
+    caja_actualizada = db.Column(db.Boolean, default = False)
 
     def __repr__(self):
-        return f'Resumen de {self.fecha} con total {self.total} y cambio {self.cambio}'
+        return f'Resumen de {self.fecha} con total {self.total} y cambio {self.cambio}, {self.caja_actualizada}'
 
 @login.user_loader
 def load_user(id):

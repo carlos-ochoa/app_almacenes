@@ -29,7 +29,7 @@ def operacion():
                 r.balance_billetes = actualizar_balance(billetes_str, '0 0 0 0 0 0', tipo = 'entrada')
                 db.session.add(r)
             db.session.commit()
-            return redirect(url_for('caja', actualizar_valores_caja = False))
+            return redirect(url_for('caja'))
         else:
             flash('Ha ocurrido un error en la alta de la operación')
     return render_template('operacion.html',title = 'Operaciones', form = form, tipo = 'entrada')
@@ -86,7 +86,7 @@ def operacion_salida():
                     r.balance_billetes = balance_nuevo
                     db.session.add(r)
             db.session.commit()
-            return redirect(url_for('caja', actualizar_valores_caja = False))
+            return redirect(url_for('caja'))
         else:
             flash('Ha ocurrido un error en la alta de la operación')
     return render_template('operacion.html',title = 'Operaciones', form = form, tipo = 'salida', balance = balance_impresion, info_cambio = info_cambio)
@@ -95,7 +95,6 @@ def operacion_salida():
 @app.route('/caja')
 @login_required
 def caja():
-    actualizar_valores_caja = request.args.get('actualizar_valores_caja')
     denominaciones = ['20','50','100','200','500','1000']
     fecha = datetime.today().strftime('%Y-%m-%d')
     ayer = (datetime.today() - timedelta(days = 1)).strftime('%Y-%m-%d')
@@ -107,28 +106,10 @@ def caja():
     if len(cambios) == 0:
         cambios = None
     if r is not None:
-        if r_ayer is not None:
-            # Este bloque de lineas provoca el bug
-            if actualizar_valores_caja == 'True':
-                r.total += r_ayer.total
-                r.cambio += r_ayer.cambio
-                r.balance_billetes = actualizar_balance(r_ayer.balance_billetes, r.balance_billetes, tipo = 'entrada')
-                total_billetes = calcular_total(r.balance_billetes)
-
-                balance = dict(zip(denominaciones,r.balance_billetes.split()))
-                total_billetes = calcular_total(r.balance_billetes)
-                saldo_total = r.total
-                cambio = r_ayer.cambio
-            else:
-                balance = dict(zip(denominaciones,r.balance_billetes.split()))
-                total_billetes = calcular_total(r.balance_billetes)
-                saldo_total = r.total
-                cambio = r_ayer.cambio    
-        else:
-            balance = dict(zip(denominaciones,r.balance_billetes.split()))
-            total_billetes = calcular_total(r.balance_billetes)
-            saldo_total = r.total
-            cambio = r.cambio
+        balance = dict(zip(denominaciones,r.balance_billetes.split()))
+        total_billetes = calcular_total(r.balance_billetes)
+        saldo_total = r.total
+        cambio = r.cambio
     else:
         r = Resumen()
         db.session.add(r)
@@ -138,21 +119,16 @@ def caja():
             saldo_total = 0.0
             cambio = 0.0
         else:
-            if actualizar_valores_caja:
-                r.total += r_ayer.total
-                r.cambio += r_ayer.cambio
-                r.balance_billetes = actualizar_balance(r_ayer.balance_billetes, r.balance_billetes, tipo = 'entrada')
-                total_billetes = calcular_total(r.balance_billetes)
-                
-                cambio = r_ayer.cambio
-                total_billetes = calcular_total(r_ayer.balance_billetes)
-                saldo_total = total_billetes + cambio
-                balance = r_ayer.balance_billetes
-            else:
-                cambio = r_ayer.cambio
-                total_billetes = calcular_total(r_ayer.balance_billetes)
-                saldo_total = total_billetes + cambio
-                balance = r_ayer.balance_billetes
+            r.total = r_ayer.total
+            r.cambio = r_ayer.cambio
+            r.balance_billetes = r_ayer.balance_billetes
+            r.caja_actualizada = True
+            total_billetes = calcular_total(r.balance_billetes)
+               
+            cambio = r.cambio
+            total_billetes = calcular_total(r.balance_billetes)
+            saldo_total = total_billetes + cambio
+            balance = dict(zip(denominaciones,r.balance_billetes.split()))
     db.session.commit()
     return render_template('caja.html', saldo_total = saldo_total, cambio = cambio, entradas = entradas, salidas = salidas, balance = balance, total_billetes = total_billetes, \
         cambios = cambios)
@@ -171,7 +147,7 @@ def cambiar():
             r = Resumen.query.filter_by(fecha = fecha).first()
             if r is None:
                 flash('No hay registros monetarios')
-                return redirect(url_for('caja', actualizar_valores_caja = False))
+                return redirect(url_for('caja'))
             if total > float(cambio_total) or r.cambio == 0.0:
                 flash('La cantidad a cambiar no puede ser superior al cambio en monedas existente')
                 return redirect(url_for('cambiar', cambio_total = cambio_total))
@@ -216,7 +192,7 @@ def ver():
                 db.session.commit()
             else:
                 flash('Balance de billetes no válido')
-            return redirect(url_for('caja', actualizar_valores_caja = False))
+            return redirect(url_for('caja'))
     if request.method == 'GET':
         if tipo == 'entrada':
             form = OperacionForm(concepto = operacion.concepto, billetes_20 = billetes[0], \
@@ -246,13 +222,13 @@ def eliminar():
     r.total = calcular_total(r.balance_billetes) + r.cambio    
     db.session.delete(operacion)
     db.session.commit()
-    return redirect(url_for('caja', actualizar_valores_caja = False))
+    return redirect(url_for('caja'))
 
 @app.route('/buscar_por_fecha', methods = ['GET','POST'])
 @login_required
 def buscarFecha():
     form = BusquedaFechaForm()
-    r, entradas, salidas = None, [], []
+    r, entradas, salidas, cambios = None, None, None, None
     total_billetes = 0.0
     if request.method == 'POST':
         if form.validate_on_submit():
@@ -262,7 +238,8 @@ def buscarFecha():
                 total_billetes = calcular_total(r.balance_billetes)
             entradas = Operacion.query.filter_by(fecha = form.fecha.data, tipo = 'entrada').all()
             salidas = Operacion.query.filter_by(fecha = form.fecha.data, tipo = 'salida').all()
-    return render_template('busquedaFecha.html', form = form, r = r, entradas = entradas, salidas = salidas, total_billetes = total_billetes)
+            cambios = Operacion.query.filter_by(fecha = form.fecha.data, tipo = 'cambio').all()
+    return render_template('busquedaFecha.html', form = form, r = r, entradas = entradas, salidas = salidas, total_billetes = total_billetes, cambios = cambios)
 
 @app.route('/buscar_por_concepto', methods = ['GET','POST'])
 @login_required
@@ -278,7 +255,7 @@ def buscarSalida():
 @app.route('/login', methods = ['GET','POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('caja', actualizar_valores_caja = False))
+        return redirect(url_for('caja'))
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(nombre = form.username.data).first()
@@ -287,17 +264,13 @@ def login():
             return redirect(url_for('login'))
         fecha = datetime.today().strftime('%Y-%m-%d')
         ultimo_login_diario = user.ultimo_login_diario
-        print(fecha)
-        print(ultimo_login_diario)
-        actualizar_valores_caja = False if ultimo_login_diario == fecha else True
         user.ultimo_login_diario = fecha
-        print(user.ultimo_login_diario)
         db.session.commit()
         login_user(user)
         next_page = request.args.get('next')
         if not next_page or url_parse(next_page).netloc != '' or url_parse(next_page) == '/caja' \
             or url_parse(next_page) == '/':
-            next_page = url_for('caja', actualizar_valores_caja = actualizar_valores_caja)
+            next_page = url_for('caja')
         return redirect(next_page)
     return render_template('login.html', form = form)
 
@@ -305,4 +278,4 @@ def login():
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('login'))
+    return redirect(url_for('caja'))
